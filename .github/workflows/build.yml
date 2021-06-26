@@ -1,0 +1,31 @@
+name: build
+on: [push]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0} 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Activate Conda Environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: numpy-and-images
+          environment-file: environment.yml
+
+      - name: Create Notebook
+        run: jupytext --to notebook --execute notebook.py
+
+      - name: Deployment to gh-pages
+        run: rm .gitignore
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: "."
+          SINGLE_COMMIT: true
+          PRESERVE: true
