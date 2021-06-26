@@ -22,7 +22,7 @@ im_array
 print(f"shape: {im_array.shape}")
 print(f"data type: {im_array.dtype}")
 print(f"memory view: {memoryview(im_array)}")
-# Nota: memory views (https://docs.python.org/3/library/stdtypes.html?highlight=memory%20view#memoryview) 
+# Nota: memory views (https://docs.python.org/3/library/stdtypes.html?highlight=memory%20view#memoryview)
 # are interesting but this is probably too technical,
 # since they retain info about so many things (item size,
 # nesting, etc.). (Nota: memoryview creates a *buffer* from
@@ -42,16 +42,20 @@ print(f"data (raw): {raw_data}...")
 # bytes), then build it back. (this is simplified, arrays
 # are more complex but forget it for now).
 # %%
-a = array([[1, 2, 3], [4, 5, 6]], dtype=uint8)
-data = a.tobytes() # bytes ("buffer"-like) 
+a = array([[0, 1, 2], [3, 4, 5]], dtype=uint8)
 shape_ = a.shape
+print(shape_)
 dtype_ = a.dtype
+print(dtype_)
+data = a.tobytes()  # bytes ("buffer"-like)
+print(data)  # Here, on this special case, it's perfectly readable
+# (assuming that you know how to read hexadecimal data)
 frombuffer(data, dtype=dtype_).reshape(shape_)
 
 # %%
 bytes_ = im_array.tobytes()
 print(len(bytes_))
-#print(bytes_) # That would be sooo slow; don't.
+# print(bytes_) # That would be sooo slow; don't.
 print(bytes_[:100])
 print(bytes_[0])
 
@@ -86,8 +90,8 @@ float64(3.14)
 # random access for example. We need fixed-size + no dereferencing to be fast.
 # Can't explain properly this here.
 # **BUT** we can talk about *size* and how that would be wasteful to represent
-# 
-# Also say how these type differ from the corresponding python type 
+#
+# Also say how these type differ from the corresponding python type
 # (especially for integers where things get tricky! For floating-points,
 # you can consider that `float` and `float64` aka `double` are the same thing
 # and forget entirely about `single` / `float32`).
@@ -102,7 +106,7 @@ float64(3.14)
 
 # %% [markdown]
 # Ho, fuck me, there are weird things going on :
-# 
+#
 #     >>> a = array([2**64-1])
 #     >>> a
 #     array([18446744073709551615], dtype=uint64)
@@ -112,7 +116,7 @@ float64(3.14)
 #     <class 'numpy.uint64'>
 
 # %%
-a = array([2**64-1])
+a = array([2 ** 64 - 1])
 a
 
 # %%
@@ -124,9 +128,26 @@ uint64
 # %% [markdown]
 # Didactics: high-level stuff before the details: existence of "data type"
 # from image examination *before* the details about data types ?
-# Dunno, think of it. Probably, yes. 
+# Dunno, think of it. Probably, yes.
+#
+# Yeah and even simpler. Somehow, "array with types" are simpler than "types"
+# (and if you really vectorize everything, you almost never get to play with
+# numeric types directly, or only in situation when it does not matter).
+#
+# For example, mutation is far simpler with (dtyped) arrays than it is with
+# scalars. **NAH, scalars are not mutable.**. Consider:
+# %%
+a = array([0], dtype=uint8)
+a[0] = 123456789  # 123456789 "coerced" to the 0-255 range.
+a
+# %% [markdown]
+# versus
+# %%
+a = uint8(0)
+a += 123456789
+type(a)  # Hey, a is NOT mutable, some promotion has been going on.
 
-# %% [markdown] 
+# %% [markdown]
 # ### Display an image array
 # **TODO:** details about the conversion
 # %%
@@ -134,4 +155,32 @@ Image.fromarray(im_array)
 # %%
 
 
-# TODO: use of colormaps for floating-point values ???
+# TODO: use of colormaps for arrays with floating-point values ???
+
+# %% [markdown]
+# ## Advanced Indexing
+
+# %%
+pink = im_array[0, 0] # as sampled in top-left corner
+pink
+# %% 
+
+# %%
+# more complex than i was expecting. Fuck ... would need to work
+# on grayscale images to demonstrate it simply.
+match = (im_array == pink) # doesn't work as expected
+# matches at the color channel level.
+match = ((im_array[:, :, 0] == pink[0]) *
+(im_array[:, :, 1] == pink[1])*
+(im_array[:, :, 2] == pink[2]))
+
+# %%
+match_b = match.reshape(match.shape + (1,)) # UGLY HACK to make broacasting 
+# work in `where`!
+print(match.shape)
+white = array([255, 255, 255], dtype=uint8)
+im_array2 = where(match_b, white, im_array).astype(uint8)
+im_array2.dtype
+Image.fromarray(im_array2)
+
+# %%
