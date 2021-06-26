@@ -1,0 +1,4 @@
+# Jupyter Notebooks
+# -----------------
+# Sources are *.py files (in the percent format), notebooks (.ipynb files) are generated
+*.ipynb 
