@@ -20,8 +20,10 @@ jobs:
       - name: Create Notebook
         run: jupytext --to notebook --execute notebook.py
 
-      - name: Deployment to gh-pages
+      - name: Prepare Deployment
         run: rm .gitignore
+
+      - name: Deployment to gh-pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
