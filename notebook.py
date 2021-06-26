@@ -8,6 +8,7 @@ from PIL import Image
 path = "images/mike-dorner-sf_1ZDA1YFw-unsplash.jpg"
 image = Image.open(path)
 image
+# TODO: dynamically via requests? What about the image type then?
 
 # %% [markdown]
 # ## Images as arrays
@@ -53,6 +54,77 @@ print(len(bytes_))
 #print(bytes_) # That would be sooo slow; don't.
 print(bytes_[:100])
 print(bytes_[0])
+
+# %% [markdown]
+# Data type would need a section by itself; they key point is that in pure
+# Python, it's obvious to tell what the type of numeric datum is: it's either
+# int or float (or complex or bool, but you get the point), so beyond that,
+# you don't need to care.
+# %%
+type(1)
+# %%
+type(1.0)
+
+# In NumPy, there are several integer and floating-point types, and it's
+# not always obvious to tell which one is used.
+
+# %%
+int64(42)
+
+# %%
+uint8(42)
+
+# %%
+float32(3.14)
+
+# %%
+float64(3.14)
+
+# %% [markdown]
+# **TODO:** Explain why several types are needed (array of fixed-size objects)
+# are "easier" to deal with and lend themselves to faster operations; think
+# random access for example. We need fixed-size + no dereferencing to be fast.
+# Can't explain properly this here.
+# **BUT** we can talk about *size* and how that would be wasteful to represent
+# 
+# Also say how these type differ from the corresponding python type 
+# (especially for integers where things get tricky! For floating-points,
+# you can consider that `float` and `float64` aka `double` are the same thing
+# and forget entirely about `single` / `float32`).
+
+# %% [markdown]
+# This is very interesting how `array(i)` works when `i` is a Python `int`.
+# The `array` factory tries very hard to help you to represent the integer
+# without loss of information, but at the same time to keep the integer
+# size small. So depending on the number it will generate `int64`, `uint64`
+# or `object` data type (`object` only stores the reference to the integer,
+# which is stored elsewhere).
+
+# %% [markdown]
+# Ho, fuck me, there are weird things going on :
+# 
+#     >>> a = array([2**64-1])
+#     >>> a
+#     array([18446744073709551615], dtype=uint64)
+#     >>> type(a[0])
+#     <class 'numpy.ulonglong'>
+#     >>> uint64
+#     <class 'numpy.uint64'>
+
+# %%
+a = array([2**64-1])
+a
+
+# %%
+type(a[0])
+
+# %%
+uint64
+
+# %% [markdown]
+# Didactics: high-level stuff before the details: existence of "data type"
+# from image examination *before* the details about data types ?
+# Dunno, think of it. Probably, yes. 
 
 # %% [markdown] 
 # ### Display an image array
