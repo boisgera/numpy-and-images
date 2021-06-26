@@ -1,0 +1,28 @@
+name: numpy-and-images
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - setuptools
+
+  - black
+  - twine
+
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  
+  - mpmath
+  - autograd
+
+  - matplotlib
+  - seaborn
+
+  - notebook
+  - jupyterlab
+  - jupytext
+
+
+
