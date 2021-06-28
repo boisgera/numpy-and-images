@@ -1,0 +1,4 @@
+{
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/home/boisgera/miniconda3/envs/numpy-and-images/bin/python"
+}

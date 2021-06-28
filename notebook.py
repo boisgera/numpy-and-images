@@ -1,7 +1,10 @@
 # Jupyter Notebook (percent format)
 
 # %%
-import numpy as np; from numpy import array
+import numpy as np
+from numpy import array
+from numpy import uint8, uint64, int64, float32, float64
+
 from PIL import Image
 import requests
 
@@ -24,15 +27,13 @@ assert content_disposition.startswith("attachment;filename=")
 filename = content_disposition.split('"')[-2]
 open(filename, "wb").write(request.content)
 
-# TODO: use the SMALL image version.
-
-
 # %% [markdown]
 # ## Images as arrays
+# PIL images are "array-like": they implement the NumPy array interface.
+# Consequently, they can be simply converted to NumPy arrays:
 # %%
-im_array = array(image)  # PIL image is "array-like"?
-# Does it have the array interface ?
-print("image provides an array interface ?", "__array_interface__" in dir(image))
+assert "__array_interface__" in dir(image)
+im_array = array(image)
 
 # %%
 im_array
@@ -62,6 +63,9 @@ print(f"data (raw): {raw_data}...")
 # Create an array, get its components (shape, dtype and
 # bytes), then build it back. (this is simplified, arrays
 # are more complex but forget it for now).
+#
+# Note: anything that's "buffer-like" (that implements the buffer protocol)
+# can be used in NumPy's `frombuffer` function to create an array.
 # %%
 a = array([[0, 1, 2], [3, 4, 5]], dtype=uint8)
 shape_ = a.shape
@@ -71,10 +75,10 @@ print(dtype_)
 data = a.tobytes()  # bytes ("buffer"-like)
 print(data)  # Here, on this special case, it's perfectly readable
 # (assuming that you know how to read hexadecimal data)
-frombuffer(data, dtype=dtype_).reshape(shape_)
+np.frombuffer(data, dtype=dtype_).reshape(shape_)
 # NOTA: framebuffer never required actually ? The `array` constructor does
 # accept anything that follows the buffer protocol?
-print(array(data, dtype=dtype_))
+# print(array(data, dtype=dtype_))
 # Nope. So we need frombuffer ...
 
 # %%
@@ -101,7 +105,7 @@ type(1.0)
 int64(42)
 
 # %%
-uint8(42)
+np.uint8(42)
 
 # %%
 float32(3.14)
@@ -162,13 +166,13 @@ uint64
 # For example, mutation is far simpler with (dtyped) arrays than it is with
 # scalars. **NAH, scalars are not mutable.**. Consider:
 # %%
-a = array([0], dtype=uint8)
+a = array([0], dtype=np.uint8)
 a[0] = 123456789  # 123456789 "coerced" to the 0-255 range.
 a
 # %% [markdown]
 # versus
 # %%
-a = uint8(0)
+a = np.uint8(0)
 a += 123456789
 type(a)  # Hey, a is NOT mutable, some promotion has been going on.
 
@@ -205,8 +209,8 @@ match = (
 match_b = match.reshape(match.shape + (1,))  # UGLY HACK to make broacasting
 # work in `where`!
 print(match.shape)
-white = array([255, 255, 255], dtype=uint8)
-im_array2 = where(match_b, white, im_array).astype(uint8)
+white = array([255, 255, 255], dtype=np.uint8)
+im_array2 = np.where(match_b, white, im_array).astype(np.uint8)
 im_array2.dtype
 Image.fromarray(im_array2)
 
