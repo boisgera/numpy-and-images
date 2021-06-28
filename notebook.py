@@ -3,6 +3,7 @@
 # %%
 from numpy import *
 from PIL import Image
+import requests
 
 # %%
 path = "images/mike-dorner-sf_1ZDA1YFw-unsplash.jpg"
@@ -10,10 +11,31 @@ image = Image.open(path)
 image
 # TODO: dynamically via requests? What about the image type then?
 
+# %%
+url = "https://unsplash.com/photos/sf_1ZDA1YFw/download?force=true"
+r = requests.get(url, allow_redirects=True)
+print(r)
+print(dir(r))
+print(r.headers)
+open("image.png", 'wb').write(r.content)
+# OK, that works but is there a way to get the image format?
+# Either from requests or from the file?
+# NOTA: when i download it in the browser it has a default NAME,
+# I'd just like to keep that name. OK! Got some 
+# "attachment;filename" key with just that !
+# See also: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
+
+# TODO: use the SMALL image version.
+
+
 # %% [markdown]
 # ## Images as arrays
 # %%
-im_array = array(image)
+im_array = array(image) # PIL image is "array-like"? 
+# Does it have the array interface ?
+print("image provides an array interface ?", "__array_interface__" in dir(image))
+
+# %%
 im_array
 
 # %%
@@ -51,6 +73,10 @@ data = a.tobytes()  # bytes ("buffer"-like)
 print(data)  # Here, on this special case, it's perfectly readable
 # (assuming that you know how to read hexadecimal data)
 frombuffer(data, dtype=dtype_).reshape(shape_)
+# NOTA: framebuffer never required actually ? The `array` constructor does 
+# accept anything that follows the buffer protocol?
+print(array(data, dtype=dtype_))
+# Nope. So we need frombuffer ...
 
 # %%
 bytes_ = im_array.tobytes()
