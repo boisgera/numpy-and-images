@@ -2,3 +2,12 @@
 # -----------------
 # Sources are *.py files (in the percent format), notebooks (.ipynb files) are generated
 *.ipynb 
+
+# Images
+# ------
+# Images at the toplevel are downloaded
+/*.jpg
+/*.jpeg
+/*.png
+/*.gif
+/*.bmp

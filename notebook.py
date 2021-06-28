@@ -1,7 +1,7 @@
 # Jupyter Notebook (percent format)
 
 # %%
-from numpy import *
+import numpy as np; from numpy import array
 from PIL import Image
 import requests
 
@@ -11,19 +11,18 @@ image = Image.open(path)
 image
 # TODO: dynamically via requests? What about the image type then?
 
+# %% [markdown]
+# Download the small version of Mike Dorner's banana:
 # %%
-url = "https://unsplash.com/photos/sf_1ZDA1YFw/download?force=true"
-r = requests.get(url, allow_redirects=True)
-print(r)
-print(dir(r))
-print(r.headers)
-open("image.png", 'wb').write(r.content)
-# OK, that works but is there a way to get the image format?
-# Either from requests or from the file?
-# NOTA: when i download it in the browser it has a default NAME,
-# I'd just like to keep that name. OK! Got some 
-# "attachment;filename" key with just that !
-# See also: <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
+url = "https://unsplash.com/photos/sf_1ZDA1YFw/download?force=true&w=640"
+request = requests.get(url, allow_redirects=True)
+# %% [markdown]
+# See <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition>
+# %%
+content_disposition = request.headers["Content-Disposition"]
+assert content_disposition.startswith("attachment;filename=")
+filename = content_disposition.split('"')[-2]
+open(filename, "wb").write(request.content)
 
 # TODO: use the SMALL image version.
 
@@ -31,7 +30,7 @@ open("image.png", 'wb').write(r.content)
 # %% [markdown]
 # ## Images as arrays
 # %%
-im_array = array(image) # PIL image is "array-like"? 
+im_array = array(image)  # PIL image is "array-like"?
 # Does it have the array interface ?
 print("image provides an array interface ?", "__array_interface__" in dir(image))
 
@@ -73,7 +72,7 @@ data = a.tobytes()  # bytes ("buffer"-like)
 print(data)  # Here, on this special case, it's perfectly readable
 # (assuming that you know how to read hexadecimal data)
 frombuffer(data, dtype=dtype_).reshape(shape_)
-# NOTA: framebuffer never required actually ? The `array` constructor does 
+# NOTA: framebuffer never required actually ? The `array` constructor does
 # accept anything that follows the buffer protocol?
 print(array(data, dtype=dtype_))
 # Nope. So we need frombuffer ...
@@ -187,21 +186,23 @@ Image.fromarray(im_array)
 # ## Advanced Indexing
 
 # %%
-pink = im_array[0, 0] # as sampled in top-left corner
+pink = im_array[0, 0]  # as sampled in top-left corner
 pink
-# %% 
+# %%
 
 # %%
 # more complex than i was expecting. Fuck ... would need to work
 # on grayscale images to demonstrate it simply.
-match = (im_array == pink) # doesn't work as expected
+match = im_array == pink  # doesn't work as expected
 # matches at the color channel level.
-match = ((im_array[:, :, 0] == pink[0]) *
-(im_array[:, :, 1] == pink[1])*
-(im_array[:, :, 2] == pink[2]))
+match = (
+    (im_array[:, :, 0] == pink[0])
+    * (im_array[:, :, 1] == pink[1])
+    * (im_array[:, :, 2] == pink[2])
+)
 
 # %%
-match_b = match.reshape(match.shape + (1,)) # UGLY HACK to make broacasting 
+match_b = match.reshape(match.shape + (1,))  # UGLY HACK to make broacasting
 # work in `where`!
 print(match.shape)
 white = array([255, 255, 255], dtype=uint8)
